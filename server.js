@@ -11,10 +11,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Initialize metrics
 let metrics = {
-  paircode: 1428,
-  api: 8925,
-  bot: 317,
-  cdn: 5243
+  paircode: 0,
+  api: 0,
+  bot: 0,
+  cdn: 0
 };
 
 // HTTP server
