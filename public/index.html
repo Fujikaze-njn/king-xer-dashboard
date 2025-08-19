@@ -304,6 +304,11 @@
             box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
         }
 
+        .status-dot.connecting {
+            background-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+        }
+
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.2); opacity: 0.8; }
@@ -344,6 +349,11 @@
             background: linear-gradient(90deg, white, transparent);
             z-index: 1;
             opacity: 0;
+        }
+
+        .no-data-placeholder {
+            color: rgba(240, 248, 255, 0.4);
+            font-style: italic;
         }
 
         @media (max-width: 768px) {
@@ -389,7 +399,7 @@
                     <a href="https://king-xer-pair.zone.id/" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 <div class="metric-display">
-                    <div class="metric-value" id="paircode-count">0</div>
+                    <div class="metric-value" id="paircode-count">--</div>
                     <div class="metric-label">Active Sessions</div>
                 </div>
                 <p class="metric-description">
@@ -406,7 +416,7 @@
                     <a href="https://King454534-king-api.hf.space/" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 <div class="metric-display">
-                    <div class="metric-value" id="api-count">0</div>
+                    <div class="metric-value" id="api-count">--</div>
                     <div class="metric-label">Requests Processed</div>
                 </div>
                 <p class="metric-description">
@@ -423,7 +433,7 @@
                     <a href="https://github.com/KING-DAVIDX/Queen_Alya" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 <div class="metric-display">
-                    <div class="metric-value" id="bot-count">0</div>
+                    <div class="metric-value" id="bot-count">--</div>
                     <div class="metric-label">Active Bots</div>
                 </div>
                 <p class="metric-description">
@@ -440,7 +450,7 @@
                     <a href="https://king-xer-cdn.zone.id" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 <div class="metric-display">
-                    <div class="metric-value" id="cdn-count">0</div>
+                    <div class="metric-value" id="cdn-count">--</div>
                     <div class="metric-label">Content Delivered</div>
                 </div>
                 <p class="metric-description">
@@ -454,8 +464,8 @@
         
         <div class="status-bar">
             <div class="connection-status" id="connection-status">
-                <div class="status-dot" id="status-dot"></div>
-                <span id="status-text">Connecting to network...</span>
+                <div class="status-dot connecting" id="status-dot"></div>
+                <span id="status-text">Connecting to King-Xer network...</span>
             </div>
             <div class="last-updated" id="last-updated">
                 Awaiting first signal...
@@ -464,6 +474,22 @@
     </div>
 
     <script>
+        // Configuration
+        const RECONNECT_INITIAL_DELAY = 1000; // 1 second
+        const RECONNECT_MAX_DELAY = 30000; // 30 seconds
+        const RECONNECT_BACKOFF_FACTOR = 1.5;
+        
+        let reconnectAttempts = 0;
+        let reconnectTimeoutId = null;
+        let ws = null;
+        
+        let metrics = {
+            paircode: 0,
+            api: 0,
+            bot: 0,
+            cdn: 0
+        };
+        
         function createStars() {
             const container = document.getElementById('stars-container');
             const starCount = 200;
@@ -522,13 +548,6 @@
             }, 2000);
         }
         
-        let metrics = {
-            paircode: 0,
-            api: 0,
-            bot: 0,
-            cdn: 0
-        };
-        
         function updateMetrics() {
             // Animate the counting up effect
             animateValue('paircode-count', parseInt(document.getElementById('paircode-count').textContent.replace(/,/g, '') || 0, metrics.paircode, 1000);
@@ -542,6 +561,12 @@
         }
         
         function animateValue(id, start, end, duration) {
+            // Handle initial state with -- values
+            if (isNaN(start)) {
+                document.getElementById(id).textContent = end.toLocaleString();
+                return;
+            }
+            
             if (start === end) return;
             
             const range = end - start;
@@ -564,56 +589,128 @@
             window.requestAnimationFrame(step);
         }
         
-        function updateConnectionStatus(connected, message = '') {
+        function updateConnectionStatus(status, message = '') {
             const statusDot = document.getElementById('status-dot');
             const statusText = document.getElementById('status-text');
             
-            if (connected) {
-                statusDot.className = 'status-dot connected';
-                statusText.textContent = message || 'Connected to King-Xer network';
-            } else {
-                statusDot.className = 'status-dot disconnected';
-                statusText.textContent = message || 'Disconnected - reconnecting...';
+            // Remove all status classes
+            statusDot.classList.remove('connected', 'disconnected', 'connecting');
+            
+            switch(status) {
+                case 'connected':
+                    statusDot.classList.add('connected');
+                    statusText.textContent = message || 'Connected to King-Xer network';
+                    reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+                    break;
+                case 'disconnected':
+                    statusDot.classList.add('disconnected');
+                    statusText.textContent = message || 'Disconnected from King-Xer network';
+                    break;
+                case 'connecting':
+                    statusDot.classList.add('connecting');
+                    statusText.textContent = message || 'Connecting to King-Xer network...';
+                    break;
+                case 'error':
+                    statusDot.classList.add('disconnected');
+                    statusText.textContent = message || 'Connection error';
+                    break;
             }
         }
         
+        function calculateReconnectDelay() {
+            const delay = RECONNECT_INITIAL_DELAY * Math.pow(RECONNECT_BACKOFF_FACTOR, reconnectAttempts);
+            return Math.min(delay, RECONNECT_MAX_DELAY);
+        }
+        
         function connectWebSocket() {
+            // Clear any existing reconnect timeout
+            if (reconnectTimeoutId) {
+                clearTimeout(reconnectTimeoutId);
+                reconnectTimeoutId = null;
+            }
+            
+            updateConnectionStatus('connecting');
+            
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/`;
-            const ws = new WebSocket(wsUrl);
             
-            ws.onopen = () => {
-                console.log('Connected to King-Xer WebSocket server');
-                updateConnectionStatus(true);
-            };
-            
-            ws.onclose = () => {
-                console.log('Disconnected from WebSocket server');
-                updateConnectionStatus(false);
-                setTimeout(connectWebSocket, 5000);
-            };
-            
-            ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
+            try {
+                ws = new WebSocket(wsUrl);
                 
-                if (data.type === 'INIT') {
-                    metrics = data.data;
-                    updateMetrics();
-                } else if (data.type === 'UPDATE') {
-                    metrics[data.metric] = data.value;
-                    updateMetrics();
-                    updateConnectionStatus(true, `New ${data.metric} signal received`);
+                ws.onopen = () => {
+                    console.log('Connected to King-Xer WebSocket server');
+                    updateConnectionStatus('connected');
+                    reconnectAttempts = 0; // Reset on successful connection
+                };
+                
+                ws.onclose = (event) => {
+                    console.log('Disconnected from WebSocket server', event.code, event.reason);
+                    updateConnectionStatus('disconnected', 'Disconnected - attempting to reconnect...');
                     
-                    setTimeout(() => {
-                        updateConnectionStatus(true);
-                    }, 2000);
+                    // Schedule reconnection with exponential backoff
+                    reconnectAttempts++;
+                    const delay = calculateReconnectDelay();
+                    console.log(`Attempting reconnect in ${delay/1000} seconds (attempt ${reconnectAttempts})`);
+                    
+                    reconnectTimeoutId = setTimeout(() => {
+                        connectWebSocket();
+                    }, delay);
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.type === 'INIT') {
+                            metrics = data.data;
+                            updateMetrics();
+                        } else if (data.type === 'UPDATE') {
+                            metrics[data.metric] = data.value;
+                            updateMetrics();
+                            updateConnectionStatus('connected', `New ${data.metric} signal received`);
+                            
+                            // Revert to normal status after 2 seconds
+                            setTimeout(() => {
+                                updateConnectionStatus('connected');
+                            }, 2000);
+                        }
+                    } catch (error) {
+                        console.error('Error processing WebSocket message:', error);
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    updateConnectionStatus('error', 'Connection error - attempting to reconnect...');
+                };
+                
+            } catch (error) {
+                console.error('Failed to create WebSocket connection:', error);
+                updateConnectionStatus('error', 'Failed to connect - will retry...');
+                
+                // Schedule reconnection with exponential backoff
+                reconnectAttempts++;
+                const delay = calculateReconnectDelay();
+                reconnectTimeoutId = setTimeout(() => {
+                    connectWebSocket();
+                }, delay);
+            }
+        }
+        
+        // Fallback: Try to fetch initial metrics via HTTP if WebSocket fails
+        async function fetchInitialMetrics() {
+            try {
+                const response = await fetch('/metrics');
+                if (response.ok) {
+                    const data = await response.json();
+                    metrics = data;
+                    updateMetrics();
+                    updateConnectionStatus('connected', 'Connected via HTTP fallback');
                 }
-            };
-            
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-                updateConnectionStatus(false, 'Connection error');
-            };
+            } catch (error) {
+                console.error('Failed to fetch initial metrics:', error);
+                // Keep the placeholder values
+            }
         }
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -621,11 +718,13 @@
             createShootingStars();
             connectWebSocket();
             
-            // Simulate some initial data for demo
+            // Set up HTTP fallback in case WebSocket doesn't connect within 5 seconds
             setTimeout(() => {
-                metrics = { paircode: 42, api: 1337, bot: 7, cdn: 2048 };
-                updateMetrics();
-            }, 2000);
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    console.log('WebSocket connection taking too long, trying HTTP fallback...');
+                    fetchInitialMetrics();
+                }
+            }, 5000);
         });
     </script>
 </body>
