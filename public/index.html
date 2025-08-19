@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>King-Xer Cosmic Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --space-black: #0a0e17;
@@ -12,37 +13,33 @@
             --nebula-purple: #9370db;
             --cosmic-teal: #20b2aa;
             --milky-white: #f0f8ff;
-            --comet-orange: #ffa500;
-            --xer-gold: #ffd700;
+            --cosmic-gray: #2a2f3a;
+            --accent-gold: #ffd700;
+            --planet-orange: #ff7f50;
+            --comet-green: #00ffcc;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Orbitron', 'Arial', sans-serif;
-        }
-
-        @font-face {
-            font-family: 'Orbitron';
-            src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background-color: var(--space-black);
+            background: linear-gradient(135deg, var(--space-black) 0%, var(--deep-space) 100%);
             color: var(--milky-white);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(30, 144, 255, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 30%, rgba(147, 112, 219, 0.1) 0%, transparent 25%),
-                radial-gradient(circle at 50% 80%, rgba(32, 178, 170, 0.1) 0%, transparent 30%);
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            position: relative;
+            z-index: 2;
         }
 
         header {
@@ -52,36 +49,55 @@
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
-            background: linear-gradient(90deg, var(--xer-gold), var(--star-blue));
+            background: linear-gradient(90deg, var(--accent-gold), var(--star-blue), var(--nebula-purple));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--star-blue), var(--nebula-purple));
+            border-radius: 3px;
         }
 
         .subtitle {
             color: var(--cosmic-teal);
             font-size: 1.2rem;
             margin-bottom: 2rem;
+            opacity: 0.9;
+            text-shadow: 0 0 10px rgba(32, 178, 170, 0.4);
         }
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2rem;
+            margin-bottom: 3rem;
         }
 
         .metric-card {
-            background: linear-gradient(135deg, var(--deep-space), rgba(18, 26, 42, 0.7));
-            border-radius: 15px;
+            background: rgba(18, 26, 42, 0.7);
+            border-radius: 20px;
             padding: 2rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(30, 144, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .metric-card::before {
@@ -91,49 +107,141 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(30, 144, 255, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
             transform: rotate(30deg);
-            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
         .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(30, 144, 255, 0.4);
+            box-shadow: 0 15px 35px rgba(30, 144, 255, 0.2);
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
         }
 
         .metric-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.3rem;
             color: var(--star-blue);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(30, 144, 255, 0.4);
         }
 
         .metric-icon {
-            width: 30px;
-            height: 30px;
+            font-size: 1.8rem;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            color: var(--accent-gold);
+        }
+
+        .visit-btn {
+            background: linear-gradient(90deg, var(--star-blue), var(--nebula-purple));
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem 1.2rem;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(30, 144, 255, 0.2);
+            gap: 0.5rem;
+            box-shadow: 0 4px 10px rgba(30, 144, 255, 0.3);
+        }
+
+        .visit-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 15px rgba(30, 144, 255, 0.5);
+        }
+
+        .visit-btn i {
+            font-size: 0.8rem;
+        }
+
+        .metric-display {
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
         }
 
         .metric-value {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 1rem 0;
-            background: linear-gradient(90deg, var(--milky-white), var(--xer-gold));
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--milky-white), var(--accent-gold), var(--planet-orange));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+
+        .metric-value::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+        }
+
+        .metric-label {
+            color: rgba(240, 248, 255, 0.7);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
         }
 
         .metric-description {
-            color: rgba(240, 248, 255, 0.7);
-            font-size: 0.9rem;
+            color: rgba(240, 248, 255, 0.8);
+            font-size: 0.95rem;
             line-height: 1.5;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-ring {
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            width: 120px;
+            height: 120px;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke: var(--star-blue);
+            stroke-width: 8;
+            stroke-dasharray: 330;
+            stroke-dashoffset: 0;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            animation: orbit 3s linear infinite;
+        }
+
+        @keyframes orbit {
+            from { stroke-dashoffset: 330; }
+            to { stroke-dashoffset: 0; }
         }
 
         .stars {
@@ -148,130 +256,214 @@
 
         .star {
             position: absolute;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
             animation: twinkle var(--duration) infinite ease-in-out;
         }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 1; }
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
-        .signal-indicator {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: rgba(30, 144, 255, 0.2);
-            border: 1px solid var(--star-blue);
-            border-radius: 50px;
-            padding: 0.5rem 1rem;
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(42, 47, 58, 0.6);
+            border-radius: 16px;
+            padding: 1.2rem 2rem;
+            border: 1px solid rgba(30, 144, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .connection-status {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            box-shadow: 0 0 15px rgba(30, 144, 255, 0.3);
+            gap: 0.75rem;
+            font-size: 0.95rem;
         }
 
-        .signal-dot {
+        .status-dot {
             width: 10px;
             height: 10px;
-            background-color: var(--comet-orange);
             border-radius: 50%;
-            animation: pulse 1.5s infinite;
+            background-color: var(--cosmic-teal);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .status-dot.connected {
+            background-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .status-dot.disconnected {
+            background-color: #ff4444;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 0.8; }
         }
 
         .last-updated {
-            text-align: center;
-            margin-top: 3rem;
-            color: rgba(240, 248, 255, 0.5);
-            font-size: 0.8rem;
+            color: rgba(240, 248, 255, 0.6);
+            font-size: 0.9rem;
         }
 
-        /* Responsive adjustments */
+        .planet {
+            position: fixed;
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0.1;
+            filter: blur(1px);
+        }
+
+        #planet1 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 30% 30%, var(--planet-orange), transparent 70%);
+            top: 10%;
+            right: 5%;
+        }
+
+        #planet2 {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at 40% 40%, var(--nebula-purple), transparent 70%);
+            bottom: 15%;
+            left: 5%;
+        }
+
+        .shooting-star {
+            position: fixed;
+            height: 2px;
+            background: linear-gradient(90deg, white, transparent);
+            z-index: 1;
+            opacity: 0;
+        }
+
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
             
             h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+
+            .metric-value {
+                font-size: 3rem;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .visit-btn {
+                padding: 0.6rem 1rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="stars" id="stars-container"></div>
+    <div id="planet1" class="planet"></div>
+    <div id="planet2" class="planet"></div>
     
     <div class="container">
         <header>
-            <h1>👑 King-Xer Cosmic Dashboard</h1>
-            <p class="subtitle">Real-time monitoring of all King-Xer services across the cosmos</p>
+            <h1>King-Xer Cosmic Dashboard</h1>
+            <p class="subtitle">Real-time monitoring across the digital cosmos</p>
         </header>
         
         <div class="dashboard-grid">
             <div class="metric-card">
-                <h2 class="metric-title">
-                    <span class="metric-icon">👨‍💻</span>
-                    PairCode Sessions
-                </h2>
-                <div class="metric-value" id="paircode-count">0</div>
+                <div class="metric-header">
+                    <h2 class="metric-title"><i class="metric-icon fas fa-code"></i> PairCode Sessions</h2>
+                    <a href="https://king-xer-pair.zone.id/" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="metric-display">
+                    <div class="metric-value" id="paircode-count">0</div>
+                    <div class="metric-label">Active Sessions</div>
+                </div>
                 <p class="metric-description">
-                    Active PairCode programming sessions across all galaxies. Each signal represents a new collaborative coding session.
+                    Collaborative coding sessions across galaxies
                 </p>
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle r="52" cx="60" cy="60"></circle>
+                </svg>
             </div>
             
             <div class="metric-card">
-                <h2 class="metric-title">
-                    <span class="metric-icon">🔌</span>
-                    API Calls
-                </h2>
-                <div class="metric-value" id="api-count">0</div>
+                <div class="metric-header">
+                    <h2 class="metric-title"><i class="metric-icon fas fa-server"></i> API Calls</h2>
+                    <a href="https://King454534-king-api.hf.space/" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="metric-display">
+                    <div class="metric-value" id="api-count">0</div>
+                    <div class="metric-label">Requests Processed</div>
+                </div>
                 <p class="metric-description">
-                    Interstellar API requests processed by our cosmic servers. Each signal is an API call from somewhere in the universe.
+                    Interstellar API requests from cosmic servers
                 </p>
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle r="52" cx="60" cy="60"></circle>
+                </svg>
             </div>
             
             <div class="metric-card">
-                <h2 class="metric-title">
-                    <span class="metric-icon">🤖</span>
-                    Bots Deployed
-                </h2>
-                <div class="metric-value" id="bot-count">0</div>
+                <div class="metric-header">
+                    <h2 class="metric-title"><i class="metric-icon fas fa-robot"></i> Bots Deployed</h2>
+                    <a href="https://github.com/KING-DAVIDX/Queen_Alya" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="metric-display">
+                    <div class="metric-value" id="bot-count">0</div>
+                    <div class="metric-label">Active Bots</div>
+                </div>
                 <p class="metric-description">
-                    Autonomous bots exploring the digital cosmos. Each signal represents a new bot deployment to a distant server.
+                    Autonomous bots exploring digital space
                 </p>
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle r="52" cx="60" cy="60"></circle>
+                </svg>
             </div>
 
             <div class="metric-card">
-                <h2 class="metric-title">
-                    <span class="metric-icon">🌐</span>
-                    CDN Requests
-                </h2>
-                <div class="metric-value" id="cdn-count">0</div>
+                <div class="metric-header">
+                    <h2 class="metric-title"><i class="metric-icon fas fa-bolt"></i> CDN Requests</h2>
+                    <a href="https://king-xer-cdn.zone.id" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="metric-display">
+                    <div class="metric-value" id="cdn-count">0</div>
+                    <div class="metric-label">Content Delivered</div>
+                </div>
                 <p class="metric-description">
-                    Content delivery network requests served across the intergalactic network. Lightspeed content delivery in action.
+                    Lightspeed content delivery network
                 </p>
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle r="52" cx="60" cy="60"></circle>
+                </svg>
             </div>
         </div>
         
-        <div class="last-updated" id="last-updated">
-            Awaiting first signal from the cosmos...
+        <div class="status-bar">
+            <div class="connection-status" id="connection-status">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Connecting to network...</span>
+            </div>
+            <div class="last-updated" id="last-updated">
+                Awaiting first signal...
+            </div>
         </div>
-    </div>
-    
-    <div class="signal-indicator" id="signal-indicator">
-        <div class="signal-dot"></div>
-        <span>Connecting to King-Xer network...</span>
     </div>
 
     <script>
-        // Create stars
         function createStars() {
             const container = document.getElementById('stars-container');
             const starCount = 200;
@@ -280,12 +472,11 @@
                 const star = document.createElement('div');
                 star.classList.add('star');
                 
-                // Random properties for each star
-                const size = Math.random() * 2;
+                const size = Math.random() * 2 + 0.5;
                 const x = Math.random() * 100;
                 const y = Math.random() * 100;
-                const duration = 2 + Math.random() * 3 + 's';
-                const delay = Math.random() * 5 + 's';
+                const duration = 2 + Math.random() * 5 + 's';
+                const delay = Math.random() * 8 + 's';
                 
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
@@ -298,7 +489,39 @@
             }
         }
         
-        // Initialize metrics
+        function createShootingStars() {
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const shootingStar = document.createElement('div');
+                    shootingStar.classList.add('shooting-star');
+                    
+                    const startX = Math.random() * 100;
+                    const startY = Math.random() * 30;
+                    const length = 50 + Math.random() * 100;
+                    const angle = Math.random() * 30 - 15;
+                    const duration = 0.5 + Math.random() * 1.5;
+                    
+                    shootingStar.style.width = `${length}px`;
+                    shootingStar.style.left = `${startX}%`;
+                    shootingStar.style.top = `${startY}%`;
+                    shootingStar.style.transform = `rotate(${angle}deg)`;
+                    shootingStar.style.opacity = '0.8';
+                    
+                    document.body.appendChild(shootingStar);
+                    
+                    setTimeout(() => {
+                        shootingStar.style.transition = `all ${duration}s linear`;
+                        shootingStar.style.transform = `translate(${window.innerWidth}px, ${window.innerHeight}px) rotate(${angle}deg)`;
+                        shootingStar.style.opacity = '0';
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(shootingStar);
+                    }, duration * 1000 + 100);
+                }
+            }, 2000);
+        }
+        
         let metrics = {
             paircode: 0,
             api: 0,
@@ -306,19 +529,54 @@
             cdn: 0
         };
         
-        // Update the UI with current metrics
         function updateMetrics() {
-            document.getElementById('paircode-count').textContent = metrics.paircode.toLocaleString();
-            document.getElementById('api-count').textContent = metrics.api.toLocaleString();
-            document.getElementById('bot-count').textContent = metrics.bot.toLocaleString();
-            document.getElementById('cdn-count').textContent = metrics.cdn.toLocaleString();
+            // Animate the counting up effect
+            animateValue('paircode-count', parseInt(document.getElementById('paircode-count').textContent.replace(/,/g, '') || 0, metrics.paircode, 1000);
+            animateValue('api-count', parseInt(document.getElementById('api-count').textContent.replace(/,/g, '') || 0, metrics.api, 1000);
+            animateValue('bot-count', parseInt(document.getElementById('bot-count').textContent.replace(/,/g, '') || 0, metrics.bot, 1000);
+            animateValue('cdn-count', parseInt(document.getElementById('cdn-count').textContent.replace(/,/g, '') || 0, metrics.cdn, 1000);
             
             const now = new Date();
             document.getElementById('last-updated').textContent = 
-                `Last signal received: ${now.toLocaleTimeString()} on ${now.toLocaleDateString()}`;
+                `Last update: ${now.toLocaleTimeString()}`;
         }
         
-        // Connect to WebSocket server
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            
+            const range = end - start;
+            const element = document.getElementById(id);
+            let startTime = null;
+            
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const value = Math.floor(progress * range + start);
+                element.textContent = value.toLocaleString();
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    element.textContent = end.toLocaleString();
+                }
+            }
+            
+            window.requestAnimationFrame(step);
+        }
+        
+        function updateConnectionStatus(connected, message = '') {
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            
+            if (connected) {
+                statusDot.className = 'status-dot connected';
+                statusText.textContent = message || 'Connected to King-Xer network';
+            } else {
+                statusDot.className = 'status-dot disconnected';
+                statusText.textContent = message || 'Disconnected - reconnecting...';
+            }
+        }
+        
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/`;
@@ -326,20 +584,12 @@
             
             ws.onopen = () => {
                 console.log('Connected to King-Xer WebSocket server');
-                document.getElementById('signal-indicator').innerHTML = `
-                    <div class="signal-dot" style="background-color: limegreen;"></div>
-                    <span>Connected to King-Xer network</span>
-                `;
+                updateConnectionStatus(true);
             };
             
             ws.onclose = () => {
                 console.log('Disconnected from WebSocket server');
-                document.getElementById('signal-indicator').innerHTML = `
-                    <div class="signal-dot" style="background-color: red;"></div>
-                    <span>Disconnected - attempting to reconnect...</span>
-                `;
-                
-                // Attempt to reconnect after 5 seconds
+                updateConnectionStatus(false);
                 setTimeout(connectWebSocket, 5000);
             };
             
@@ -347,40 +597,35 @@
                 const data = JSON.parse(event.data);
                 
                 if (data.type === 'INIT') {
-                    // Initial metrics data
                     metrics = data.data;
                     updateMetrics();
                 } else if (data.type === 'UPDATE') {
-                    // Metric update
                     metrics[data.metric] = data.value;
                     updateMetrics();
+                    updateConnectionStatus(true, `New ${data.metric} signal received`);
                     
-                    // Show signal indicator
-                    const indicator = document.getElementById('signal-indicator');
-                    indicator.innerHTML = `
-                        <div class="signal-dot"></div>
-                        <span>New ${data.metric} signal received!</span>
-                    `;
-                    
-                    // Reset indicator after 3 seconds
                     setTimeout(() => {
-                        indicator.innerHTML = `
-                            <div class="signal-dot" style="background-color: limegreen;"></div>
-                            <span>Connected to King-Xer network</span>
-                        `;
-                    }, 3000);
+                        updateConnectionStatus(true);
+                    }, 2000);
                 }
             };
             
             ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
+                updateConnectionStatus(false, 'Connection error');
             };
         }
         
-        // Initialize the dashboard
         document.addEventListener('DOMContentLoaded', () => {
             createStars();
+            createShootingStars();
             connectWebSocket();
+            
+            // Simulate some initial data for demo
+            setTimeout(() => {
+                metrics = { paircode: 42, api: 1337, bot: 7, cdn: 2048 };
+                updateMetrics();
+            }, 2000);
         });
     </script>
 </body>
