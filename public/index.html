@@ -136,7 +136,7 @@
             font-size: 1.3rem;
             color: var(--star-blue);
             font-weight: 600;
-            text-shadow: 极 0 10px rgba(30, 144, 255, 0.4);
+            text-shadow: 0 10px rgba(30, 144, 255, 0.4);
         }
 
         .metric-icon {
@@ -155,7 +155,7 @@
             font-size: 0.9rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 极 0.3s ease;
+            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -187,7 +187,7 @@
             color: transparent;
             line-height: 1;
             margin-bottom: 0.5rem;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            text-shadow: 极 0 15px rgba(255, 215, 0, 0.3);
             position: relative;
             display: inline-block;
         }
@@ -215,7 +215,7 @@
             font-size: 0.95rem;
             line-height: 1.5;
             position: relative;
-           极 z-index: 2;
+            z-index: 2;
         }
 
         .progress-ring {
@@ -228,7 +228,7 @@
             z-index: 1;
         }
 
-        .极 progress-ring circle {
+        .progress-ring circle {
             fill: none;
             stroke: var(--star-blue);
             stroke-width: 8;
@@ -246,7 +246,7 @@
 
         .stars {
             position: fixed;
-            top: 极 0;
+            top: 0;
             left: 0;
             width: 100%;
             height: 100%;
@@ -270,7 +270,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(42, 47, 58, 0.6);
+            background: rgba(42, 47, 58, 极 0.6);
             border-radius: 16px;
             padding: 1.2rem 2rem;
             border: 1px solid rgba(30, 144, 255, 0.15);
@@ -296,7 +296,7 @@
 
         .status-dot.connected {
             background-color: #00ff88;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 极 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
         }
 
         .status-dot.disconnected {
@@ -304,7 +304,7 @@
             box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
         }
 
-        .status-d极 ot.connecting {
+        .status-dot.connecting {
             background-color: #ffcc00;
             box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
         }
@@ -422,7 +422,7 @@
                 <p class="metric-description">
                     Interstellar API requests from cosmic servers
                 </p>
-                <svg class="progress-ring" viewBox="0 0 120 120">
+                <svg class="progress-ring" view极="0 0 120 120">
                     <circle r="52" cx="60" cy="60"></circle>
                 </svg>
             </div>
@@ -430,7 +430,7 @@
             <div class="metric-card">
                 <div class="metric-header">
                     <h2 class="metric-title"><i class="metric-icon fas fa-robot"></i> Bots Deployed</h2>
-                    <a href="https://github.com/KING-DAVIDX/Queen_Alya" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
+                    <a href="https://github.com/KING-DAVIDX/Queen_Alya" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></极></a>
                 </div>
                 <div class="metric-display">
                     <div class="metric-value" id="bot-count">--</div>
@@ -450,7 +450,7 @@
                     <a href="https://king-xer-cdn.zone.id" target="_blank" class="visit-btn">Visit <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 <div class="metric-display">
-                    <div class="metric极-value" id="cdn-count">--</div>
+                    <div class="metric-value" id="cdn-count">--</div>
                     <div class="metric-label">Content Delivered</div>
                 </div>
                 <p class="metric-description">
@@ -467,7 +467,7 @@
                 <div class="status-dot connecting" id="status-dot"></div>
                 <span id="status-text">Connecting to King-Xer network...</span>
             </div>
-            <div class="last-updated"极 id="last-updated">
+            <div class="last-updated" id="last-updated">
                 Awaiting first signal...
             </div>
         </div>
@@ -528,7 +528,7 @@
                     const duration = 0.5 + Math.random() * 1.5;
                     
                     shootingStar.style.width = `${length}px`;
-                    shootingStar.style.left = `${极 startX}%`;
+                    shootingStar.style.left = `${startX}%`;
                     shootingStar.style.top = `${startY}%`;
                     shootingStar.style.transform = `rotate(${angle}deg)`;
                     shootingStar.style.opacity = '0.8';
@@ -571,13 +571,13 @@
             
             const range = end - start;
             const element = document.getElementById(id);
-            let start极 Time = null;
+            let startTime = null;
             
             function step(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const progress = Math.min((timestamp - startTime) / duration, 1);
                 const value = Math.floor(progress * range + start);
-                element.textContent = value极.toLocaleString();
+                element.textContent = value.toLocaleString();
                 
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
@@ -598,7 +598,7 @@
             
             switch(status) {
                 case 'connected':
-                    statusDot.classList.add('connected');
+                    status极.classList.add('connected');
                     statusText.textContent = message || 'Connected to King-Xer network';
                     reconnectAttempts = 0; // Reset reconnect attempts on successful connection
                     break;
