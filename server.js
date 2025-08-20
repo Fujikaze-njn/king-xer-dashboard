@@ -41,7 +41,13 @@ async function loadMetrics() {
   try {
     let savedMetrics = await Metrics.findOne();
     if (savedMetrics) {
-      metrics = savedMetrics;
+      // Extract only the metric fields, excluding MongoDB-specific fields
+      metrics = {
+        paircode: savedMetrics.paircode || 0,
+        api: savedMetrics.api || 0,
+        bot: savedMetrics.bot || 0,
+        cdn: savedMetrics.cdn || 0
+      };
       console.log('Metrics loaded from database:', metrics);
     } else {
       // Create initial metrics document if none exists
@@ -65,10 +71,16 @@ const server = app.listen(PORT, () => {
 // WebSocket server
 const wss = new WebSocket.Server({ server });
 
+// Add CORS handling for WebSocket
+wss.on('headers', (headers, req) => {
+  // Set CORS headers for WebSocket connections if needed
+  headers['Access-Control-Allow-Origin'] = req.headers.origin || '*';
+});
+
 wss.on('connection', (ws) => {
   console.log('New dashboard client connected');
   
-  // Send current metrics to new client
+  // Send current metrics to new client (only the values, not the MongoDB document)
   ws.send(JSON.stringify({
     type: 'INIT',
     data: metrics
@@ -76,6 +88,10 @@ wss.on('connection', (ws) => {
   
   ws.on('close', () => {
     console.log('Dashboard client disconnected');
+  });
+  
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
   });
 });
 
@@ -94,34 +110,72 @@ async function updateMetricInDatabase(type, value) {
 
 // Endpoint to receive signals from other services
 app.post('/signal', express.json(), async (req, res) => {
-  const { type } = req.body;
-  
-  if (metrics.hasOwnProperty(type)) {
-    metrics[type]++;
+  try {
+    const { type } = req.body;
     
-    // Update metric in database
-    await updateMetricInDatabase(type, metrics[type]);
+    if (!type) {
+      return res.status(400).json({ success: false, error: 'Type is required' });
+    }
     
-    // Broadcast update to all connected dashboard clients
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          type: 'UPDATE',
-          metric: type,
-          value: metrics[type]
-        }));
-      }
-    });
-    
-    res.status(200).json({ success: true, newCount: metrics[type] });
-  } else {
-    res.status(400).json({ success: false, error: 'Invalid metric type' });
+    if (metrics.hasOwnProperty(type)) {
+      metrics[type]++;
+      
+      // Update metric in database
+      await updateMetricInDatabase(type, metrics[type]);
+      
+      // Broadcast update to all connected dashboard clients
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'UPDATE',
+            metric: type,
+            value: metrics[type]
+          }));
+        }
+      });
+      
+      res.status(200).json({ success: true, newCount: metrics[type] });
+    } else {
+      res.status(400).json({ success: false, error: 'Invalid metric type' });
+    }
+  } catch (err) {
+    console.error('Error in /signal endpoint:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 
 // Endpoint to get current metrics (for services that can't use WebSocket)
 app.get('/metrics', (req, res) => {
   res.json(metrics);
+});
+
+// Endpoint to reset metrics (for testing)
+app.post('/reset', async (req, res) => {
+  try {
+    metrics = {
+      paircode: 0,
+      api: 0,
+      bot: 0,
+      cdn: 0
+    };
+    
+    await Metrics.findOneAndUpdate({}, metrics, { upsert: true });
+    
+    // Broadcast reset to all connected dashboard clients
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          type: 'INIT',
+          data: metrics
+        }));
+      }
+    });
+    
+    res.status(200).json({ success: true, message: 'Metrics reset', metrics });
+  } catch (err) {
+    console.error('Error resetting metrics:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 
 // Graceful shutdown
